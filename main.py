@@ -86,9 +86,19 @@ def analyze_news(request: NewsRequest):
         
         logger.info(f"Successfully analyzed news for {request.instrument}")
         
+        try:
+            verdict_json = json.loads(verdict_response.choices[0].message.content)
+        except json.JSONDecodeError:
+            # If the response is not valid JSON, create a structured response
+            verdict_json = {
+                "verdict": "NEUTRAL",
+                "confidence": 50,
+                "key_reason": "Could not parse verdict response"
+            }
+        
         return {
             "analysis": analysis_response.choices[0].message.content,
-            "verdict": json.loads(verdict_response.choices[0].message.content)
+            "verdict": verdict_json
         }
             
     except Exception as e:
