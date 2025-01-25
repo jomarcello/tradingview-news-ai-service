@@ -25,7 +25,7 @@ class NewsRequest(BaseModel):
     articles: List[Dict[str, Any]]
 
 @app.post("/analyze-news")
-async def analyze_news(request: NewsRequest):
+def analyze_news(request: NewsRequest):
     """Analyze news articles and provide sentiment analysis."""
     try:
         # Create a prompt for news analysis
@@ -49,7 +49,7 @@ async def analyze_news(request: NewsRequest):
         Format your response in a clear, structured way with emoji where appropriate."""
 
         # Call OpenAI API for analysis
-        analysis_response = await client.chat.completions.create(
+        analysis_response = client.chat.completions.create(
             model="gpt-4-0125-preview",
             messages=[{
                 "role": "system",
@@ -71,7 +71,7 @@ async def analyze_news(request: NewsRequest):
         - confidence: (percentage between 0-100)
         - key_reason: (brief explanation)"""
         
-        verdict_response = await client.chat.completions.create(
+        verdict_response = client.chat.completions.create(
             model="gpt-4-0125-preview",
             messages=[{
                 "role": "system",
@@ -96,7 +96,7 @@ async def analyze_news(request: NewsRequest):
         raise HTTPException(status_code=500, detail=str(e))
 
 @app.post("/get-market-context")
-async def get_market_context(instrument: str):
+def get_market_context(instrument: str):
     """Get broader market context and potential correlations."""
     try:
         prompt = f"""Provide a brief market context analysis for {instrument}. Consider:
@@ -107,7 +107,7 @@ async def get_market_context(instrument: str):
         
         Format your response in a clear, concise way."""
 
-        response = await client.chat.completions.create(
+        response = client.chat.completions.create(
             model="gpt-4-0125-preview",
             messages=[{
                 "role": "system",
