@@ -20,6 +20,32 @@ app = FastAPI()
 # Initialize OpenAI client
 client = OpenAI(api_key=os.getenv("OPENAI_KEY"))
 
+SYSTEM_PROMPT = """You are a financial news analyst. Analyze the provided news articles and create a concise but comprehensive market analysis. Focus on the potential impact on trading decisions.
+
+Your analysis should follow this format:
+
+🔍 Market Impact Analysis
+------------------------
+• Summary: [2-3 bullet points of key facts]
+
+📊 Market Sentiment
+------------------
+• Direction: [Bullish/Bearish/Neutral]
+• Strength: [Strong/Moderate/Weak]
+• Key Reason: [One line explanation]
+
+💡 Trading Implications
+---------------------
+• Short-term: [Expected impact]
+• Risk level: [High/Medium/Low]
+• Key levels to watch: [Support/Resistance if relevant]
+
+⚠️ Risk Factors
+--------------
+• [List 2-3 key risks to watch]
+
+Make it concise and easy to read. Use emojis sparingly but effectively. Format in Markdown for better readability."""
+
 class NewsRequest(BaseModel):
     instrument: str
     articles: List[Dict[str, Any]]
@@ -37,23 +63,20 @@ def analyze_news(request: NewsRequest):
             for article in request.articles
         ])
         
-        prompt = f"""Analyze these news articles about {request.instrument} and provide:
-        1. A concise summary of the key points
-        2. Overall market sentiment (Bullish/Bearish/Neutral)
-        3. Key factors influencing the market
-        4. Potential impact on trading decisions
-        
-        News Articles:
-        {articles_text}
-        
-        Format your response in a clear, structured way with emoji where appropriate."""
+        prompt = f"""Analyze these news articles about {request.instrument} and provide a concise market analysis.
+
+News Articles:
+{articles_text}
+
+Format your response according to the following guidelines:
+{SYSTEM_PROMPT}"""
 
         # Call OpenAI API for analysis
         analysis_response = client.chat.completions.create(
             model="gpt-4-0125-preview",
             messages=[{
                 "role": "system",
-                "content": "You are a financial news analyst specializing in market sentiment analysis. Your job is to analyze news articles and provide clear, actionable insights for traders."
+                "content": SYSTEM_PROMPT
             }, {
                 "role": "user",
                 "content": prompt
