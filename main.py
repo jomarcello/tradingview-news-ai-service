@@ -24,25 +24,25 @@ SYSTEM_PROMPT = """You are a financial news analyst. Analyze the provided news a
 
 Your analysis should follow this format:
 
-🔍 *Market Impact Analysis*
+ *Market Impact Analysis*
 
 • ECB's latest decision: [key point]
 • Market implications: [key point]
 • Current trend: [key point]
 
-📊 *Market Sentiment*
+ *Market Sentiment*
 
 • Direction: [Bullish/Bearish/Neutral]
 • Strength: [Strong/Moderate/Weak]
 • Key driver: [One line explanation]
 
-💡 *Trading Implications*
+ *Trading Implications*
 
 • Short-term outlook: [Expected impact]
 • Risk assessment: [High/Medium/Low]
 • Key levels: [Support/Resistance if relevant]
 
-⚠️ *Risk Factors*
+ *Risk Factors*
 
 • [Risk factor 1]
 • [Risk factor 2]
@@ -129,6 +129,7 @@ Format your response according to the following guidelines:
             }
         
         return {
+            "status": "success",
             "analysis": analysis_response.choices[0].message.content,
             "verdict": verdict_json
         }
