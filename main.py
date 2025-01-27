@@ -128,9 +128,30 @@ Format your response according to the following guidelines:
                 "key_reason": "Could not parse verdict response"
             }
         
+        # Format the analysis with sections and emojis
+        analysis = f"""Based on recent news and market data for {request.instrument}:
+
+🔮 Market Impact Analysis
+{analysis_response.choices[0].message.content}
+
+📊 Market Sentiment
+• Direction: {verdict_json['verdict']}
+• Strength: {verdict_json['confidence']}%
+• Key driver: {verdict_json['key_reason']}
+
+💡 Trading Implications
+• Short-term outlook: {verdict_json['verdict']}
+• Risk assessment: {verdict_json['confidence']}%
+• Key levels: N/A
+
+⚠️ Risk Factors
+• N/A
+• N/A
+• N/A"""
+        
         return {
             "status": "success",
-            "analysis": analysis_response.choices[0].message.content,
+            "analysis": analysis,
             "verdict": verdict_json
         }
             
