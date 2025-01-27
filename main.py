@@ -128,26 +128,54 @@ Format your response according to the following guidelines:
                 "key_reason": "Could not parse verdict response"
             }
         
+        # Parse the OpenAI response into sections
+        ai_response = analysis_response.choices[0].message.content
+        
+        # Extract sections from AI response
+        sections = {}
+        current_section = None
+        current_content = []
+        
+        for line in ai_response.split('\n'):
+            if 'Market Impact Analysis' in line:
+                current_section = 'market_impact'
+                continue
+            elif 'Market Sentiment' in line:
+                sections['market_impact'] = '\n'.join(current_content).strip()
+                current_section = 'market_sentiment'
+                current_content = []
+                continue
+            elif 'Trading Implications' in line:
+                sections['market_sentiment'] = '\n'.join(current_content).strip()
+                current_section = 'trading_implications'
+                current_content = []
+                continue
+            elif 'Risk Factors' in line:
+                sections['trading_implications'] = '\n'.join(current_content).strip()
+                current_section = 'risk_factors'
+                current_content = []
+                continue
+            
+            if current_section and line.strip():
+                current_content.append(line.strip())
+        
+        if current_content:
+            sections['risk_factors'] = '\n'.join(current_content).strip()
+
         # Format the analysis with sections and emojis
         analysis = f"""Based on recent news and market data for {request.instrument}:
 
 🔮 Market Impact Analysis
-{analysis_response.choices[0].message.content}
+{sections.get('market_impact', 'No market impact analysis available.')}
 
 📊 Market Sentiment
-• Direction: {verdict_json['verdict']}
-• Strength: {verdict_json['confidence']}%
-• Key driver: {verdict_json['key_reason']}
+{sections.get('market_sentiment', 'No market sentiment available.')}
 
 💡 Trading Implications
-• Short-term outlook: {verdict_json['verdict']}
-• Risk assessment: {verdict_json['confidence']}%
-• Key levels: N/A
+{sections.get('trading_implications', 'No trading implications available.')}
 
 ⚠️ Risk Factors
-• N/A
-• N/A
-• N/A"""
+{sections.get('risk_factors', 'No risk factors available.')}"""
         
         return {
             "status": "success",
